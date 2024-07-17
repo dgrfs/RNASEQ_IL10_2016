@@ -1,0 +1,108 @@
+Annotare_Sample_Name,Sample,Read01,Read02,Organism,Age,Development Stage,Sex,Disease,Organism Part,Individual,Material Type,Technical Replicate,Immunophenotype,Condition,Sequencing Run
+Sample 1,MERNA01,MERNA1_S1_R1_001_AH2572BGXY.fastq.gz,MERNA1_S1_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR01,gamma_delta_T_cell,IL2,AH2572BGXY
+Sample 2,MERNA02,MERNA2_S2_R1_001_AH2572BGXY.fastq.gz,MERNA2_S2_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR01,gamma_delta_T_cell,IL15,AH2572BGXY
+Sample 3,MERNA03,MERNA3_S3_R1_001_AH2572BGXY.fastq.gz,MERNA3_S3_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR01,gamma_delta_T_cell,IL21,AH2572BGXY
+Sample 4,MERNA05,MERNA5_S5_R1_001_AH2572BGXY.fastq.gz,MERNA5_S5_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR01,gamma_delta_T_cell,NONE,AH2572BGXY
+Sample 5,MERNA06,MERNA6_S6_R1_001_AH2572BGXY.fastq.gz,MERNA6_S6_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR01,gamma_delta_T_cell,IL2,AH2572BGXY
+Sample 6,MERNA07,MERNA7_S7_R1_001_AH2572BGXY.fastq.gz,MERNA7_S7_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR01,gamma_delta_T_cell,IL15,AH2572BGXY
+Sample 7,MERNA08,MERNA8_S8_R1_001_AH2572BGXY.fastq.gz,MERNA8_S8_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR01,gamma_delta_T_cell,IL21,AH2572BGXY
+Sample 8,MERNA10,MERNA10_S10_R1_001_AH2572BGXY.fastq.gz,MERNA10_S10_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR01,gamma_delta_T_cell,NONE,AH2572BGXY
+Sample 9,MERNA11,MERNA11_S11_R1_001_AH2572BGXY.fastq.gz,MERNA11_S11_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR01,gamma_delta_T_cell,IL2,AH2572BGXY
+Sample 10,MERNA12,MERNA12_S12_R1_001_AH2572BGXY.fastq.gz,MERNA12_S12_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR01,gamma_delta_T_cell,IL15,AH2572BGXY
+Sample 11,MERNA13,MERNA13_S13_R1_001_AH2572BGXY.fastq.gz,MERNA13_S13_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR01,gamma_delta_T_cell,IL21,AH2572BGXY
+Sample 12,MERNA15,MERNA15_S15_R1_001_AH2572BGXY.fastq.gz,MERNA15_S15_R2_001_AH2572BGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR01,gamma_delta_T_cell,NONE,AH2572BGXY
+Sample 13,MERNA01,MERNA1_S1_R1_001_AH33YJBGXY.fastq.gz,MERNA1_S1_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR02,gamma_delta_T_cell,IL2,AH33YJBGXY
+Sample 14,MERNA02,MERNA2_S2_R1_001_AH33YJBGXY.fastq.gz,MERNA2_S2_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR02,gamma_delta_T_cell,IL15,AH33YJBGXY
+Sample 15,MERNA03,MERNA3_S3_R1_001_AH33YJBGXY.fastq.gz,MERNA3_S3_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR02,gamma_delta_T_cell,IL21,AH33YJBGXY
+Sample 16,MERNA05,MERNA5_S5_R1_001_AH33YJBGXY.fastq.gz,MERNA5_S5_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D1,PBMC,TR02,gamma_delta_T_cell,NONE,AH33YJBGXY
+Sample 17,MERNA06,MERNA6_S6_R1_001_AH33YJBGXY.fastq.gz,MERNA6_S6_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR02,gamma_delta_T_cell,IL2,AH33YJBGXY
+Sample 18,MERNA07,MERNA7_S7_R1_001_AH33YJBGXY.fastq.gz,MERNA7_S7_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR02,gamma_delta_T_cell,IL15,AH33YJBGXY
+Sample 19,MERNA08,MERNA8_S8_R1_001_AH33YJBGXY.fastq.gz,MERNA8_S8_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR02,gamma_delta_T_cell,IL21,AH33YJBGXY
+Sample 20,MERNA10,MERNA10_S10_R1_001_AH33YJBGXY.fastq.gz,MERNA10_S10_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D2,PBMC,TR02,gamma_delta_T_cell,NONE,AH33YJBGXY
+Sample 21,MERNA11,MERNA11_S11_R1_001_AH33YJBGXY.fastq.gz,MERNA11_S11_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR02,gamma_delta_T_cell,IL2,AH33YJBGXY
+Sample 22,MERNA12,MERNA12_S12_R1_001_AH33YJBGXY.fastq.gz,MERNA12_S12_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR02,gamma_delta_T_cell,IL15,AH33YJBGXY
+Sample 23,MERNA13,MERNA13_S13_R1_001_AH33YJBGXY.fastq.gz,MERNA13_S13_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR02,gamma_delta_T_cell,IL21,AH33YJBGXY
+Sample 24,MERNA15,MERNA15_S15_R1_001_AH33YJBGXY.fastq.gz,MERNA15_S15_R2_001_AH33YJBGXY.fastq.gz,Homo sapiens,Adult,Adult,NA,NA,Blood,D3,PBMC,TR02,gamma_delta_T_cell,NONE,AH33YJBGXY
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1133276472 Aug 17Ê 2023 MERNA10_S10_R1_001_AH2572BGXY.fastq.gz,MERNA10_S10_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2011157122 Aug 17Ê 2023 MERNA10_S10_R1_001_AH33YJBGXY.fastq.gz,MERNA10_S10_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1180027151 Aug 17Ê 2023 MERNA10_S10_R2_001_AH2572BGXY.fastq.gz,MERNA10_S10_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2101824131 Aug 17Ê 2023 MERNA10_S10_R2_001_AH33YJBGXY.fastq.gz,MERNA10_S10_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1525757829 Aug 17Ê 2023 MERNA11_S11_R1_001_AH2572BGXY.fastq.gz,MERNA11_S11_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1512022247 Aug 17Ê 2023 MERNA11_S11_R1_001_AH33YJBGXY.fastq.gz,MERNA11_S11_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1568985358 Aug 17Ê 2023 MERNA11_S11_R2_001_AH2572BGXY.fastq.gz,MERNA11_S11_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1558575094 Aug 17Ê 2023 MERNA11_S11_R2_001_AH33YJBGXY.fastq.gz,MERNA11_S11_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1031984186 Aug 17Ê 2023 MERNA12_S12_R1_001_AH2572BGXY.fastq.gz,MERNA12_S12_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2225091958 Aug 17Ê 2023 MERNA12_S12_R1_001_AH33YJBGXY.fastq.gz,MERNA12_S12_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1065626680 Aug 17Ê 2023 MERNA12_S12_R2_001_AH2572BGXY.fastq.gz,MERNA12_S12_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2303264498 Aug 17Ê 2023 MERNA12_S12_R2_001_AH33YJBGXY.fastq.gz,MERNA12_S12_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2012349774 Aug 17Ê 2023 MERNA13_S13_R1_001_AH2572BGXY.fastq.gz,MERNA13_S13_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 807868019 Aug 17Ê 2023 MERNA13_S13_R1_001_AH33YJBGXY.fastq.gz,MERNA13_S13_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2068897636 Aug 17Ê 2023 MERNA13_S13_R2_001_AH2572BGXY.fastq.gz,MERNA13_S13_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 831798884 Aug 17Ê 2023 MERNA13_S13_R2_001_AH33YJBGXY.fastq.gz,MERNA13_S13_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1396930586 Aug 17Ê 2023 MERNA15_S15_R1_001_AH2572BGXY.fastq.gz,MERNA15_S15_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1605675373 Aug 17Ê 2023 MERNA15_S15_R1_001_AH33YJBGXY.fastq.gz,MERNA15_S15_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1454382199 Aug 17Ê 2023 MERNA15_S15_R2_001_AH2572BGXY.fastq.gz,MERNA15_S15_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1675701749 Aug 17Ê 2023 MERNA15_S15_R2_001_AH33YJBGXY.fastq.gz,MERNA15_S15_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2616270878 Aug 17Ê 2023 MERNA1_S1_R1_001_AH2572BGXY.fastq.gz,MERNA1_S1_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 449103381 Aug 17Ê 2023 MERNA1_S1_R1_001_AH33YJBGXY.fastq.gz,MERNA1_S1_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2691139903 Aug 17Ê 2023 MERNA1_S1_R2_001_AH2572BGXY.fastq.gz,MERNA1_S1_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 462575568 Aug 17Ê 2023 MERNA1_S1_R2_001_AH33YJBGXY.fastq.gz,MERNA1_S1_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2781155864 Aug 17Ê 2023 MERNA2_S2_R1_001_AH2572BGXY.fastq.gz,MERNA2_S2_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 409635250 Aug 17Ê 2023 MERNA2_S2_R1_001_AH33YJBGXY.fastq.gz,MERNA2_S2_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2886476863 Aug 17Ê 2023 MERNA2_S2_R2_001_AH2572BGXY.fastq.gz,MERNA2_S2_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 425506639 Aug 17Ê 2023 MERNA2_S2_R2_001_AH33YJBGXY.fastq.gz,MERNA2_S2_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1822525778 Aug 17Ê 2023 MERNA3_S3_R1_001_AH2572BGXY.fastq.gz,MERNA3_S3_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1365038644 Aug 17Ê 2023 MERNA3_S3_R1_001_AH33YJBGXY.fastq.gz,MERNA3_S3_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1871280186 Aug 17Ê 2023 MERNA3_S3_R2_001_AH2572BGXY.fastq.gz,MERNA3_S3_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1404132925 Aug 17Ê 2023 MERNA3_S3_R2_001_AH33YJBGXY.fastq.gz,MERNA3_S3_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1124871303 Aug 17Ê 2023 MERNA5_S5_R1_001_AH2572BGXY.fastq.gz,MERNA5_S5_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1847730789 Aug 17Ê 2023 MERNA5_S5_R1_001_AH33YJBGXY.fastq.gz,MERNA5_S5_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1164827474 Aug 17Ê 2023 MERNA5_S5_R2_001_AH2572BGXY.fastq.gz,MERNA5_S5_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1919755724 Aug 17Ê 2023 MERNA5_S5_R2_001_AH33YJBGXY.fastq.gz,MERNA5_S5_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1259170261 Aug 17Ê 2023 MERNA6_S6_R1_001_AH2572BGXY.fastq.gz,MERNA6_S6_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1982793643 Aug 17Ê 2023 MERNA6_S6_R1_001_AH33YJBGXY.fastq.gz,MERNA6_S6_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1304733755 Aug 17Ê 2023 MERNA6_S6_R2_001_AH2572BGXY.fastq.gz,MERNA6_S6_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2060715009 Aug 17Ê 2023 MERNA6_S6_R2_001_AH33YJBGXY.fastq.gz,MERNA6_S6_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2034417400 Aug 17Ê 2023 MERNA7_S7_R1_001_AH2572BGXY.fastq.gz,MERNA7_S7_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 750188012 Aug 17Ê 2023 MERNA7_S7_R1_001_AH33YJBGXY.fastq.gz,MERNA7_S7_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 2094012990 Aug 17Ê 2023 MERNA7_S7_R2_001_AH2572BGXY.fastq.gz,MERNA7_S7_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802Ê 772465103 Aug 17Ê 2023 MERNA7_S7_R2_001_AH33YJBGXY.fastq.gz,MERNA7_S7_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1301292312 Aug 17Ê 2023 MERNA8_S8_R1_001_AH2572BGXY.fastq.gz,MERNA8_S8_R1_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1820388966 Aug 17Ê 2023 MERNA8_S8_R1_001_AH33YJBGXY.fastq.gz,MERNA8_S8_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1343301313 Aug 17Ê 2023 MERNA8_S8_R2_001_AH2572BGXY.fastq.gz,MERNA8_S8_R2_001_AH2572BGXY.fastq.gz,,,,,,,,,,,,,
+,-rw-rw-r--. 1 c.c23086802 c.c23086802 1883114880 Aug 17Ê 2023 MERNA8_S8_R2_001_AH33YJBGXY.fastq.gz,MERNA8_S8_R2_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,MERNA10_S10_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA11_S11_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA12_S12_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA13_S13_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA15_S15_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA1_S1_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA2_S2_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA3_S3_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA5_S5_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA6_S6_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA7_S7_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
+,MERNA8_S8_R1_001_AH33YJBGXY.fastq.gz,,,,,,,,,,,,,,
