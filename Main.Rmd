@@ -135,12 +135,12 @@ common.gene.list <- common.gene.df %>%
 cgl.evidence <- common.gene.list %>% dplyr::filter(ONTOLOGY == "BP") %>% dplyr::filter(!EVIDENCE %in% c("IBA","IBD","IKR","IRD"))
 cgl.full <- common.gene.list
 
-my_table <- nice_table(cgl.evidence)
-
-print(my_table, preview = "docx")
-# pdf("~/Desktop/table.pdf")
-# print(my_table)
-# dev.off()
+# my_table <- nice_table(cgl.evidence)
+# 
+# print(my_table, preview = "docx")
+# # pdf("~/Desktop/table.pdf")
+# # print(my_table)
+# # dev.off()
 
 ```
 
@@ -154,8 +154,8 @@ Finally, taking the list of informative genes that we have obtained from the pre
 fold_cutoff <- 2.5
 pvalue_cutoff <- 0.05
 
-label_fold_cutoff <- 6
-label_pvalue_cutoff <- 0.1
+label_fold_cutoff <- 7
+label_pvalue_cutoff <- 0.05
 
 # Filter data based on cutoffs
 res.il2.labels <- subset(res.il2, abs(log2FoldChange) > label_fold_cutoff & -log10(padj) > -log10(label_pvalue_cutoff))
