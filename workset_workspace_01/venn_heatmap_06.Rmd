@@ -1,0 +1,339 @@
+---
+title: "Heatmap IL2 vs IL21"
+author: "Dan Griffiths"
+date: "2023-09-09"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Load libraries
+
+```{r libraries, message = FALSE}
+library(limma)
+library(Glimma)
+library(edgeR)
+library(tidyverse)
+library(DESeq2)
+library(org.Hs.eg.db)
+library(pheatmap)
+library(EnhancedVolcano)
+library(ComplexHeatmap)
+```
+
+```{r}
+set.seed(42) # set seed for reproducibility in clustering
+```
+
+## 1 - Import counts
+
+### 1.1 Import raw counts, coldata
+
+```{r, message=FALSE, echo=FALSE}
+ensembl.counts <- readr::read_rds('source_data/DDS_Full_counts.RDS') %>% counts(.) %>% as.matrix()
+coldata <- readr::read_csv('./source_data/coldata.csv') %>% as.data.frame()
+identical(colnames(ensembl.counts), coldata$sample)
+```
+
+### 1.2 Change gene ID name to ENSEMBL. Remove NA's
+
+```{r}
+counts <- ensembl.counts
+# Convert counts matrix to a data frame
+df <- as.data.frame(counts) %>% rownames_to_column(var = "ensembl.id")
+
+# Add SYMBOL and GENETYPE columns using AnnotationDbi's mapIds
+df <- df %>%
+  dplyr::mutate(
+    SYMBOL = mapIds(org.Hs.eg.db, keys = ensembl.id, column = "SYMBOL", keytype = "ENSEMBL"),
+    GENETYPE = mapIds(org.Hs.eg.db, keys = ensembl.id, column = "GENETYPE", keytype = "ENSEMBL")
+  )
+
+# Filter out rows where SYMBOL is NA
+df_filtered <- df[complete.cases(df$SYMBOL),]
+# Count the number of differences between df$SYMBOL and df_filtered$SYMBOL
+symbol_diff_count <- sum(!(df$SYMBOL %in% df_filtered$SYMBOL))
+
+# QC summary
+qc_summary <- data.frame(
+  symbol_has_name = symbol_diff_count,
+  All_SYMBOL = length(df_filtered$SYMBOL),
+  dup_SYMBOL = sum(duplicated(df_filtered$SYMBOL, na.rm = TRUE)),
+  protein_coding = sum(df_filtered$GENETYPE == "protein-coding", na.rm = TRUE)
+)
+
+# Display QC summary
+DT::datatable(as.data.frame(table(df$GENETYPE, useNA = "ifany")))
+DT::datatable(t(qc_summary))
+
+# Filter conditions
+filter_conditions <- df %>%
+  dplyr::filter(
+    !is.na(SYMBOL),           # Remove rows with NA in SYMBOL
+    !duplicated(SYMBOL),      # Remove rows with duplicated SYMBOL
+    GENETYPE == "protein-coding"
+  )
+
+# Apply filters to counts matrix
+counts <- counts[row.names(counts) %in% filter_conditions$ensembl.id, ]
+
+# Now, you can change Ensembl IDs to their associated SYMBOL IDs
+# Assuming the filtered counts matrix has Ensembl IDs as row names
+row_names <- row.names(counts)
+symbol_ids <- filter_conditions$SYMBOL[match(row_names, filter_conditions$ensembl.id)]
+
+# Update row names with SYMBOL IDs
+row.names(counts) <- symbol_ids
+```
+
+### 1.3 heatmap with all variance, all conditions
+
+```{r}
+dds <- DESeqDataSetFromMatrix(counts,coldata, design =~condition)
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+dds <- dds[keep,]
+dds <- DESeq(dds)
+resultsNames(dds)
+res <- results(dds,contrast = c("condition","IL2","IL21"))
+vst <- varianceStabilizingTransformation(dds)
+vsn::meanSdPlot(assay(vst))
+```
+
+### 1.4 all variance heatmap plot
+
+```{r, fig.height=10,fig.width=10}
+topVarGenes <- order(rowVars(assay(vst)), decreasing = TRUE)
+mat  <- assay(vst)[ topVarGenes[1:50], ]
+mat  <- mat - rowMeans(mat)
+anno <- coldata
+column_ha = HeatmapAnnotation(Healthy_Donor = anno$healthy_donor, Condition = anno$condition)
+Heatmap(mat,name = "mat",
+        column_title = "All variance, all conditions", 
+        top_annotation = column_ha, 
+        cluster_columns = FALSE, 
+        cluster_rows = TRUE , 
+        column_split = anno$healthy_donor
+        )
+```
+
+This heatmap is highly variable genes (HVGs), across all conditions and all donors. As there is a wide range of conditions, including unstimulated, a lot of the HVGs are not informative in terms of comparison between conditions. The highly variable genes include housekeeping genes.
+
+We want to find more appropriate genes for analysis, and although the above heatmap gives an hollistic view of the data, it is not useful for any further downstream analysis.
+
+Therefore we can - Conduct a pairwise comparison of IL2 vs IL21 to find statistically significant genes, with the most polarised log-fold change. - Taking this genes with most extreme log-fold change, and plot variance of these genes in the following situations: a) plot relative variance in statistically significant genes in all conditions b) plot relative variance in statistically significant genes for IL2 and IL21 conditions only
+
+## 2 - Make pairwise comparison, IL2vsIL21
+
+### 2.1 Pairwise comparison table
+
+Get list of genes that are LFC and p-value significant in comparison of IL2vsIL21
+
+```{r}
+resSig <- subset(res, padj < 0.1)
+lfc <- resSig[ order(resSig$log2FoldChange, decreasing=TRUE), ]
+lfc
+lfc.df <- as.data.frame(lfc)
+lfc.head <- head(lfc.df, n=50)
+lfc.tail <- tail(lfc.df, n=50)
+lfc.short <- rbind(lfc.head,lfc.tail)
+#lfc.short <- lfc.head
+lfc.short$names <- rownames(lfc.short)
+lfc.short.genes <- rownames(lfc.short)
+
+# lfc.short$desc <- mapIds(org.Hs.eg.db,lfc.short.genes,keytype = "SYMBOL",column="GENETYPE")
+# keytypes(org.Hs.eg.db)
+DT::datatable(lfc.df)
+```
+
+## 3 - Show variance of genes of interest, found in upstream analysis
+
+### 3.1 Selected genes, variance heatmap
+
+Getting genes from previous chapter, shown to be differentially expressed when IL2 is compared to IL21.
+
+Plotting the variance as a heatmap - selected conditions of interest.
+
+```{r,fig.height=25, fig.width=10}
+topVarGenes <- order(rowVars(assay(vst)), decreasing = TRUE)
+mat  <- assay(vst)[lfc.short.genes, ]
+mat  <- mat - rowMeans(mat)
+anno <- coldata
+samples_of_interest <- anno$sample[anno$condition %in% c("IL21","IL2")]
+anno <- anno[anno$condition %in% c("IL21","IL2"),]
+anno <- droplevels(anno)
+mat <- mat[,samples_of_interest]
+
+column_ha = HeatmapAnnotation(Healthy_Donor = anno$healthy_donor, 
+                              Condition = anno$condition
+                              )
+
+Heatmap(mat, 
+        name = "Relative variance",
+        column_title = "Variance of statistically significant genes, IL2 vs IL21", 
+        top_annotation = column_ha, 
+        cluster_columns = FALSE, 
+        column_split = anno$healthy_donor,
+        cluster_rows = TRUE
+        )
+
+```
+
+### LFC for each condition
+
+```{r}
+res.il21 <- results(dds,contrast = c("condition","UST","IL21"))
+res.sig.il21 <- subset(res.il21, padj < 0.1)
+lfc.il21 <- res.sig.il21[ order(res.sig.il21$log2FoldChange, decreasing=TRUE), ]
+lfc.il21
+res.il15 <- results(dds,contrast = c("condition","UST","IL15"))
+res.sig.il15 <- subset(res.il15, padj < 0.1)
+lfc.il15 <- res.sig.il15[ order(res.sig.il15$log2FoldChange, decreasing=TRUE), ]
+lfc.il15
+res.il7 <- results(dds,contrast = c("condition","UST","IL7"))
+res.sig.il7 <- subset(res.il7, padj < 0.1)
+lfc.il7 <- res.sig.il7[ order(res.sig.il7$log2FoldChange, decreasing=TRUE), ]
+lfc.il7
+res.il2 <- results(dds,contrast = c("condition","UST","IL2"))
+res.sig.il2 <- subset(res.il2, padj < 0.1)
+lfc.il2 <- res.sig.il2[ order(res.sig.il2$log2FoldChange, decreasing=TRUE), ]
+lfc.il2
+```
+
+```{r}
+## Data preparation
+pval_threshold <- 0.1
+il21.degs <- row.names(lfc.il21[which(lfc.il21$padj <= pval_threshold), ])
+il15.degs <- row.names(lfc.il15[which(lfc.il15$padj <= pval_threshold), ])
+il7.degs <- row.names(lfc.il7[which(lfc.il7$padj <= pval_threshold), ])
+il2.degs <- row.names(lfc.il2[which(lfc.il2$padj <= pval_threshold), ])
+list.degs <- paste(c(il15.degs,il7.degs,il2.degs))
+list.degs <- unique(list.degs)
+```
+
+There are some genes that appear to be constitutively active in all conditions compared to UST. These appear in most analyses, and is worth noting, but would not change the overall picture too much so at this point I don't think there is enough evidence to remove these genes from analysis completely.
+
+```{r}
+
+## Alternative method using the `gplots` library
+library(gplots)
+# Create a Venn-diagram given just the list of gene-names for both sets
+venn(list("IL21vsUST" = il21.degs,
+          "IL15vsUST" = il15.degs,
+          "IL2vsUST" = il2.degs,
+          "IL7vsUST" = il7.degs), )
+
+```
+
+```{r}
+res.il21 <- results(dds,contrast = c("condition","IL7","IL21"))
+res.sig.il21 <- subset(res.il21, padj < 0.1)
+lfc.il21 <- res.sig.il21[ order(res.sig.il21$log2FoldChange, decreasing=TRUE), ]
+lfc.il21
+res.il15 <- results(dds,contrast = c("condition","IL15","IL21"))
+res.sig.il15 <- subset(res.il15, padj < 0.1)
+lfc.il15 <- res.sig.il15[ order(res.sig.il15$log2FoldChange, decreasing=TRUE), ]
+lfc.il15
+res.il7 <- results(dds,contrast = c("condition","IL2","IL21"))
+res.sig.il7 <- subset(res.il7, padj < 0.1)
+lfc.il7 <- res.sig.il7[ order(res.sig.il7$log2FoldChange, decreasing=TRUE), ]
+lfc.il7
+
+```
+
+Now have a list of multiple condition comparisons. The picture doesn't appear to change regardless. I think the best comparison is IL2vsIL21, but I need to go through the notes to see if there is a better study design.
+
+What I could have a look at is the venn diagram of IL21vs OTHER, and IL21vsIL2, and maybe focus on genes that just appear in IL21vsIL2
+
+```{r}
+## Data preparation
+pval_threshold <- 0.1
+il21.degs <- row.names(lfc.il21[which(lfc.il21$padj <= pval_threshold), ])
+il15.degs <- row.names(lfc.il15[which(lfc.il15$padj <= pval_threshold), ])
+il7.degs <- row.names(lfc.il7[which(lfc.il7$padj <= pval_threshold), ])
+list.degs <- paste(c(il15.degs,il7.degs))
+list.degs <- unique(list.degs)
+length(list.degs)
+```
+
+```{r}
+
+## Alternative method using the `gplots` library
+library(gplots)
+# Create a Venn-diagram given just the list of gene-names for both sets
+venn(list("IL7vsIL21" = il21.degs,
+          "IL15vsIL21" = il15.degs ,
+          "IL2vsIL21" = il7.degs), )
+
+```
+
+```{r}
+# Assuming il21.degs, il15.degs, and il7.degs are your lists of genes
+
+# Create the lists
+il21_genes <- il21.degs
+il15_genes <- il15.degs
+il7_genes <- il7.degs
+
+# Extract genes in IL7vsUST that are not found in any other list
+unique_IL7_genes <- setdiff(il7_genes, union(il21_genes, il15_genes))
+
+common_genes <- Reduce(intersect, list(il21_genes, il15_genes, il7_genes))
+
+
+# Print or use the unique genes as needed
+length(unique_IL7_genes)
+head(unique_IL7_genes)
+length(common_genes)
+head(common_genes)
+```
+
+```{r}
+resSig <- subset(res, padj < 0.1)
+lfc <- resSig[ order(resSig$log2FoldChange, decreasing=TRUE), ]
+lfc
+lfc.df <- as.data.frame(lfc)
+lfc.df <- lfc.df[which(rownames(lfc.df) %in% common_genes),]
+lfc.head <- head(lfc.df, n=40)
+lfc.tail <- tail(lfc.df, n=40)
+lfc.short <- rbind(lfc.head,lfc.tail)
+lfc.short
+#lfc.short <- lfc.head
+lfc.short$names <- rownames(lfc.short)
+lfc.short.genes <- rownames(lfc.short)
+
+# lfc.short$desc <- mapIds(org.Hs.eg.db,lfc.short.genes,keytype = "SYMBOL",column="GENETYPE")
+# keytypes(org.Hs.eg.db)
+DT::datatable(lfc.df)
+```
+
+```{r,fig.height=20, fig.width=10}
+topVarGenes <- order(rowVars(assay(vst)), decreasing = TRUE)
+mat  <- assay(vst)[lfc.short.genes, ]
+mat  <- mat - rowMeans(mat)
+anno <- coldata
+# samples_of_interest <- anno$sample[anno$condition %in% c("IL21","IL2")]
+# anno <- anno[anno$condition %in% c("IL21","IL2"),]
+# anno <- droplevels(anno)
+# mat <- mat[,samples_of_interest]
+
+column_ha = HeatmapAnnotation(Healthy_Donor = anno$healthy_donor, 
+                              Condition = anno$condition
+                              )
+
+Heatmap(mat, 
+        name = "Relative variance",
+        column_title = "Variance of statistically significant genes, IL2 vs IL21", 
+        top_annotation = column_ha, 
+        cluster_columns = F, 
+        column_split = anno$healthy_donor,
+        cluster_rows = TRUE
+        )
+
+```
+
+## R session info
+
+```{r}
+sessionInfo()
+```

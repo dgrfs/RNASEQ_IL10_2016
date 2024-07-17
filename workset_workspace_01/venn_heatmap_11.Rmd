@@ -1,0 +1,212 @@
+---
+title: "Heatmap DE genes in IL21"
+author: "Dan Griffiths"
+date: "2023-11-17"
+output:
+  html_document: default
+---
+
+"Interactions between γδ T cells and B cells are important for class switching (Wen et al., 1996). γδ T cell clones in mice produce IL-10 (Wen et al., 1998), and human Vγ9 γδ T cells produce IL-10 and support antibody secretion by B cells (Caccamo et al., 2006, 2012)."
+https://www.frontiersin.org/articles/10.3389/fmicb.2017.01288/full#:~:text=Interactions%20between%20γδ%20T%20cells,.%2C%202006%2C%202012).
+https://doi.org/10.3389/fmicb.2017.01288
+
+### Load libraries
+
+```{r libraries, message = FALSE}
+library(limma)
+library(Glimma)
+library(tidyverse)
+library(DESeq2)
+library(org.Hs.eg.db)
+library(pheatmap)
+library(EnhancedVolcano)
+library(ComplexHeatmap)
+library(gplots)
+library(msigdbr)
+```
+
+### Import raw counts, coldata
+```{r}
+rds <- load("~/Downloads/subread/FeatCounts_Rsub.RData")
+counts <- as.matrix(counts$counts)
+# Find column indices that don't contain 'markdup' in the names
+selected_columns <- grep("markdup", colnames(counts), invert = TRUE)
+# Select the columns based on the indices
+filtered_matrix <- counts[, selected_columns]
+# Remove ".sorted.bam" from column names
+new_colnames <- sub("\\.sorted\\.bam", "", colnames(filtered_matrix))
+# Assign the modified column names back to the matrix
+colnames(filtered_matrix) <- new_colnames
+counts <- filtered_matrix
+```
+
+```{r, message=FALSE}
+set.seed(42)
+coldata <- readr::read_csv('./source_data/coldata.csv') %>% as.data.frame()
+identical(colnames(counts), coldata$sample)
+```
+
+### Prepare and filter counts
+```{r, message=FALSE}
+gene.list <- data.frame(entrez.id = rownames(counts))
+gene.list <- gene.list %>%
+  dplyr::mutate(
+    SYMBOL = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "SYMBOL", keytype = "ENTREZID"),
+    GENETYPE = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "GENETYPE", keytype = "ENTREZID")
+  )
+
+# Genes removed if not protein coding
+filtered.gene.list <- gene.list %>%
+  dplyr::filter(
+    !is.na(SYMBOL),
+    !duplicated(SYMBOL),
+    GENETYPE == "protein-coding"
+  )
+
+# Rename gene IDs from ensembl to symbol
+counts <- counts[rownames(counts) %in% filtered.gene.list$entrez.id, ]
+rownames(counts) <- filtered.gene.list$SYMBOL[match(rownames(counts), filtered.gene.list$entrez.id)]
+```
+
+### Generate DESeq2 object
+IL7 removed from analysis completely.
+```{r, message=FALSE, warning=FALSE}
+dds <- DESeqDataSetFromMatrix(counts,coldata, design = ~healthy_donor + condition)
+dds <- dds[ , !dds$condition %in% c("IL7") ] 
+dds$condition <- droplevels(dds$condition)
+smallestGroupSize <- 2
+keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+dds <- dds[keep,]
+dds <- DESeq(dds)
+vst <- varianceStabilizingTransformation(dds)
+vsn::meanSdPlot(assay(vst))
+
+## get raw expression alongside the vocano plot !!! does logfoldchange relate to abundance
+## trumming with LGCPM for filtering counts
+
+## 
+```
+
+
+### Total variance heatmap
+```{r,fig.height=10,fig.width=10}
+vst_data <- assay(vst)
+topVarGenes <- order(rowVars(vst_data), decreasing = TRUE)
+mat  <- vst_data[topVarGenes[1:20], ]
+mat  <- mat - rowMeans(mat)
+
+anno <- as.data.frame(colData(dds))
+annocols1 <- paste(c(unique(anno$condition)))
+annocols2 <- paste(c(unique(anno$healthy_donor)))
+vip.cols1 <- RColorBrewer::brewer.pal(name = "Dark2", n = length(annocols1))
+vip.cols2 <- RColorBrewer::brewer.pal(name = "Set2", n = length(annocols2))
+names(vip.cols1) = sort(unique(anno$condition))
+names(vip.cols2) = sort(unique(anno$healthy_donor))
+
+HA <- columnAnnotation(df = anno %>% dplyr::select(c("condition","healthy_donor")), col = list(condition=vip.cols1,healthy_donor=vip.cols2))
+
+Heatmap(mat, 
+        name = "Relative variance",
+        column_title = "Filtered counts matrix \n Variance stabilised expression heatmap \n Gene expression relative to the mean", 
+        top_annotation = HA, 
+        cluster_columns = FALSE, 
+        column_split = anno$healthy_donor,
+        cluster_rows = TRUE
+        )
+
+```
+
+### DESeq2 results pairwise each condition
+```{r}
+res.il15 <- results(dds,contrast = c("condition","IL21","IL15"))
+res.sig.il15 <- subset(res.il15, padj < 0.1)
+lfc.il15 <- res.sig.il15[ order(res.sig.il15$log2FoldChange, decreasing=TRUE), ]
+summary(lfc.il15)
+lfc.il15
+res.il2 <- results(dds,contrast = c("condition","IL21","IL2"))
+res.sig.il2 <- subset(res.il2, padj < 0.1)
+lfc.il2 <- res.sig.il2[ order(res.sig.il2$log2FoldChange, decreasing=TRUE), ]
+summary(lfc.il2)
+lfc.il2
+
+lfc.il15.df <- lfc.il15 %>% as.data.frame() %>% rownames_to_column(.,var = 'GENE_ID')
+lfc.il2.df <- lfc.il2 %>% as.data.frame() %>% rownames_to_column(.,var = 'GENE_ID')
+write_csv(lfc.il15.df, "lfc_il15_results.csv")
+write_csv(lfc.il2.df, "lfc_il2_results.csv")
+```
+
+### Venn diagram common genes that are immunologically relevent (msigDB C7 genesets)
+To extract a list of interesting genes which is DE in both conditions 
+```{r}
+## Data preparation
+il15.degs <- row.names(lfc.il15)
+il2.degs <- row.names(lfc.il2)
+list.degs <- unique(paste(c(il15.degs,il2.degs)))
+
+# Create a Venn-diagram given just the list of gene-names for both sets
+venn(list("IL15vsIL21" = il15.degs, "IL2vsIL21" = il2.degs), )
+common_genes <- Reduce(intersect, list(il2.degs, il15.degs))
+
+db.gs.c7 <- msigdbr(species = "human", category = "C7", subcategory = "IMMUNESIGDB")
+c7.common.genes <- common_genes[common_genes %in% unique(db.gs.c7$gene_symbol)]
+
+venn(list("IL15vsIL21" = il15.degs, "IL2vsIL21" = il2.degs, "c7genes" = c7.common.genes), )
+
+DT::datatable(as.data.frame(c7.common.genes))
+
+## check the 12 genes
+
+## cd markers and secreted proteins !!!!
+
+# extract 566 geens into raw matrix
+
+# over analysis
+# re-analysis from previous infromation
+# this wont change the problem with DE as shown in the heatmap
+
+# expression level and LFC
+
+# function annotations 
+
+# 500 heatmap
+# UP GENES Heatmap
+
+
+
+```
+
+### Volcano plot
+```{r,fig.height=10,fig.width=15}
+EnhancedVolcano(res.il2,
+    lab = rownames(res.il2),
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = 'IL21 versus IL2',
+    pCutoff = 5e-4,
+    FCcutoff = 2,
+    pointSize = 3.0,
+    labSize = 6.0)
+
+EnhancedVolcano(res.il15,
+    lab = rownames(res.il15),
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = 'IL21 versus IL15',
+    pCutoff = 5e-4,
+    FCcutoff = 2,
+    pointSize = 3.0,
+    labSize = 6.0)
+```
+
+- label cytokines
+- focus on UP genes
+log heatmap
+select for function genes and display
+the big 560
+
+
+## R session info
+
+```{r}
+sessionInfo()
+```

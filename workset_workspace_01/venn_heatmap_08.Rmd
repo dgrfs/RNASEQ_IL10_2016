@@ -1,0 +1,278 @@
+---
+title: "Heatmap DE genes in IL21"
+author: "Dan Griffiths"
+date: "2023-11-14"
+output:
+  html_document: default
+---
+
+### Load libraries
+
+```{r libraries, message = FALSE}
+library(limma)
+library(Glimma)
+library(tidyverse)
+library(DESeq2)
+library(org.Hs.eg.db)
+library(pheatmap)
+library(EnhancedVolcano)
+library(ComplexHeatmap)
+library(gplots)
+library(msigdbr)
+```
+
+```{r}
+# rds <- load("~/Downloads/subread/FeatCounts_Rsub.RData")
+# counts <- as.matrix(counts$counts)
+# # Find column indices that don't contain 'markdup' in the names
+# selected_columns <- grep("markdup", colnames(counts), invert = TRUE)
+# 
+# # Select the columns based on the indices
+# filtered_matrix <- counts[, selected_columns]
+# 
+# # Remove ".sorted.bam" from column names
+# new_colnames <- sub("\\.sorted\\.bam", "", colnames(filtered_matrix))
+# 
+# # Assign the modified column names back to the matrix
+# colnames(filtered_matrix) <- new_colnames
+# 
+# counts <- filtered_matrix
+```
+
+
+### Import raw counts, coldata
+```{r, message=FALSE}
+set.seed(42)
+coldata <- readr::read_csv('./source_data/coldata.csv') %>% as.data.frame()
+identical(colnames(counts), coldata$sample)
+```
+
+
+```{r}
+counts <- readr::read_rds('source_data/DDS_Full_counts.RDS') %>% counts(.) %>% as.matrix()
+rownames(counts) <- mapIds(org.Hs.eg.db, keys = rownames(counts), column = "ENTREZID", keytype = "ENSEMBL")
+# Create gene list to map from ensembl ID to 'symbol' ID -- more readable format
+gene.list <- data.frame(entrez.id = rownames(counts))
+gene.list <- gene.list %>%
+  dplyr::mutate(
+    SYMBOL = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "SYMBOL", keytype = "ENTREZID"),
+    GENETYPE = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "GENETYPE", keytype = "ENTREZID")
+  )
+
+# db.gs.c7 <- msigdbr(species = "human", category = "C7", subcategory = "IMMUNESIGDB")
+# # unique(db.gs.c7$gs_subcat)
+# 
+# 
+# # Genes removed if protein coding,
+# filtered.gene.list <- gene.list %>%
+#   dplyr::filter(
+#     !is.na(SYMBOL),
+#     !duplicated(SYMBOL),
+#     GENETYPE == "protein-coding"
+#   )
+
+# filtered.gene.list <- filtered.gene.list %>%
+#   filter(entrez.id %in% unique(db.gs.c7$human_entrez_gene))
+
+# Rename gene IDs from ensembl to symbol
+counts <- counts[row.names(counts) %in% filtered.gene.list$entrez.id, ]
+rownames(counts) <- filtered.gene.list$SYMBOL[match(rownames(counts), filtered.gene.list$entrez.id)]
+
+```
+
+
+
+
+### Prepare and filter counts
+```{r, message=FALSE}
+# # Create gene list to map from ensembl ID to 'symbol' ID -- more readable format
+# gene.list <- data.frame(entrez.id = rownames(counts))
+# gene.list <- gene.list %>%
+#   dplyr::mutate(
+#     SYMBOL = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "SYMBOL", keytype = "ENTREZID"),
+#     GENETYPE = mapIds(org.Hs.eg.db, keys = gene.list$entrez.id, column = "GENETYPE", keytype = "ENTREZID")
+#   )
+# 
+# db.gs.c7 <- msigdbr(species = "human", category = "C7", subcategory = "IMMUNESIGDB")
+# # unique(db.gs.c7$gs_subcat)
+# 
+# 
+# # Genes removed if protein coding,
+# filtered.gene.list <- gene.list %>%
+#   dplyr::filter(
+#     !is.na(SYMBOL),
+#     !duplicated(SYMBOL),
+#     GENETYPE == "protein-coding"
+#   )
+# 
+# # filtered.gene.list <- filtered.gene.list %>%
+# #   filter(entrez.id %in% unique(db.gs.c7$human_entrez_gene))
+# 
+# # Rename gene IDs from ensembl to symbol
+# counts <- counts[row.names(counts) %in% filtered.gene.list$entrez.id, ]
+# rownames(counts) <- filtered.gene.list$SYMBOL[match(rownames(counts), filtered.gene.list$entrez.id)]
+```
+
+### Generate DESeq2 object
+IL7 removed from analysis completely.
+```{r, message=FALSE, warning=FALSE}
+dds <- DESeqDataSetFromMatrix(counts,coldata, design = ~condition)
+#dds <- dds[ , !dds$condition %in% c("IL7","UST") ] 
+dds$condition <- droplevels(dds$condition)
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds) >= 5) >= smallestGroupSize
+dds <- dds[keep,]
+dds <- DESeq(dds)
+vst <- varianceStabilizingTransformation(dds)
+vsn::meanSdPlot(assay(vst))
+```
+
+```{r,fig.height=20,fig.width=10}
+vst_data <- assay(vst)
+topVarGenes <- order(rowVars(vst_data), decreasing = TRUE)
+mat  <- vst_data[1:50, ]
+mat  <- mat - rowMeans(mat)
+
+anno <- as.data.frame(colData(dds))
+annocols1 <- paste(c(unique(anno$condition)))
+annocols2 <- paste(c(unique(anno$healthy_donor)))
+vip.cols1 <- RColorBrewer::brewer.pal(name = "Dark2", n = length(annocols1))
+vip.cols2 <- RColorBrewer::brewer.pal(name = "Set2", n = length(annocols2))
+names(vip.cols1) = sort(unique(anno$condition))
+names(vip.cols2) = sort(unique(anno$healthy_donor))
+
+HA <- columnAnnotation(df = anno %>% dplyr::select(c("condition","healthy_donor")), col = list(condition=vip.cols1,healthy_donor=vip.cols2))
+
+Heatmap(mat, 
+        name = "Relative variance",
+        column_title = "Common genes differentially expressed in IL21 vs IL15, and IL21 vs IL2; \n variance stabilised expression heatmap \n gene expression relative to the mean", 
+        top_annotation = HA, 
+        cluster_columns = FALSE, 
+        column_split = anno$healthy_donor,
+        cluster_rows = TRUE
+        )
+
+```
+
+
+### DESeq2 results pairwise each condition
+```{r}
+res.il15 <- results(dds,contrast = c("condition","IL21","IL15"))
+res.sig.il15 <- subset(res.il15, padj < 0.05)
+lfc.il15 <- res.sig.il15[ order(res.sig.il15$log2FoldChange, decreasing=TRUE), ]
+summary(lfc.il15)
+lfc.il15
+res.il2 <- results(dds,contrast = c("condition","IL21","IL2"))
+res.sig.il2 <- subset(res.il2, padj < 0.05)
+lfc.il2 <- res.sig.il2[ order(res.sig.il2$log2FoldChange, decreasing=TRUE), ]
+summary(lfc.il2)
+lfc.il2
+
+
+lfc.il15.df <- lfc.il15 %>% as.data.frame() %>% rownames_to_column(.,var = 'GENE_ID')
+lfc.il2.df <- lfc.il2 %>% as.data.frame() %>% rownames_to_column(.,var = 'GENE_ID')
+write_csv(lfc.il15.df, "lfc_il15_results.csv")
+write_csv(lfc.il2.df, "lfc_il2_results.csv")
+```
+
+### Venn diagram common genes
+```{r}
+## Data preparation
+il15.degs <- row.names(lfc.il15)
+il2.degs <- row.names(lfc.il2)
+list.degs <- paste(c(il15.degs,il2.degs))
+list.degs <- unique(list.degs)
+
+# Create a Venn-diagram given just the list of gene-names for both sets
+venn(list("IL15vsIL21" = il15.degs, "IL2vsIL21" = il2.degs), )
+common_genes <- Reduce(intersect, list(il2.degs, il15.degs))
+```
+
+```{r,fig.height=15,fig.width=10}
+vst_data <- assay(vst)
+topVarGenes <- order(rowVars(vst_data), decreasing = TRUE)
+top_20 <- common_genes[1:10]
+bottom_20 <- tail(common_genes, n=10)
+short.common <- paste(c(top_20,bottom_20))
+mat  <- vst_data[short.common, ]
+mat  <- mat - rowMeans(mat)
+
+anno <- as.data.frame(colData(dds))
+annocols1 <- paste(c(unique(anno$condition)))
+annocols2 <- paste(c(unique(anno$healthy_donor)))
+vip.cols1 <- RColorBrewer::brewer.pal(name = "Dark2", n = length(annocols1))
+vip.cols2 <- RColorBrewer::brewer.pal(name = "Set2", n = length(annocols2))
+names(vip.cols1) = sort(unique(anno$condition))
+names(vip.cols2) = sort(unique(anno$healthy_donor))
+
+HA <- columnAnnotation(df = anno %>% dplyr::select(c("condition","healthy_donor")), col = list(condition=vip.cols1,healthy_donor=vip.cols2))
+
+Heatmap(mat, 
+        name = "Relative variance",
+        column_title = "Common genes differentially expressed in IL21 vs IL15, and IL21 vs IL2; \n variance stabilised expression heatmap \n gene expression relative to the mean", 
+        top_annotation = HA, 
+        cluster_columns = FALSE, 
+        column_split = anno$healthy_donor,
+        cluster_rows = TRUE
+        )
+
+```
+
+
+FCRL6 -->
+" In contrast to FCRL1–5, FCRL6 is distinctly expressed outside the B lineage by cytotoxic T and NK lymphocytes"
+https://www.frontiersin.org/articles/10.3389/fimmu.2020.575175/full
+
+
+https://www.tandfonline.com/doi/abs/10.1080/14728222.2018.1472768
+
+
+
+TIMP-1 -->
+"In addition to its inhibitory role against most of the known MMPs, the encoded protein is able to promote cell proliferation in a wide range of cell types, and may also have an anti-apoptotic function. Transcription of this gene is highly inducible in response to many cytokines and hormones." https://www.genecards.org/cgi-bin/carddisp.pl?gene=TIMP1&keywords=timp1
+
+
+
+```{r}
+# plot_data <- data.frame(Category = c("IL21vsIL2", "IL21vsIL15", "Common"),
+#                         Count = c(length(IL21vsIL2_genes), length(IL21vsIL15_genes), length(common_genes)))
+# 
+# # Create a bar plot
+# ggplot(plot_data, aes(x = Category, y = Count, fill = Category)) +
+#   geom_bar(stat = "identity") +
+#   labs(title = "Common Genes between IL21 vs IL2 and IL21 vs IL15",
+#        x = "Comparison",
+#        y = "Number of Genes") +
+#   theme_minimal()
+```
+
+
+
+```{r,fig.height=10,fig.width=15}
+EnhancedVolcano(res.il2,
+    lab = rownames(res.il2),
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = 'IL21 versus IL2',
+    pCutoff = 5e-4,
+    FCcutoff = 2,
+    pointSize = 3.0,
+    labSize = 6.0)
+
+EnhancedVolcano(res.il15,
+    lab = rownames(res.il15),
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = 'IL21 versus IL15',
+    pCutoff = 5e-4,
+    FCcutoff = 2,
+    pointSize = 3.0,
+    labSize = 6.0)
+```
+
+
+## R session info
+
+```{r}
+sessionInfo()
+```
