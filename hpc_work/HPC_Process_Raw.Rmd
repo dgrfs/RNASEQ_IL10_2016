@@ -21,8 +21,7 @@ Inflate the compressed files (and can run the md5 checksum to ensure that the tr
 
 Then move on to processing using nextflow. A tutorial can be found here:
 
-https://github.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk
-
+<https://github.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk>
 
 ``` sh
 # lang: sh
@@ -30,40 +29,45 @@ https://github.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk
 tar -xvf 161006_Run35_fastq.tar.gz
 ```
 
+Add sequencing run ID to the files
+
+-   for run35 - AH2572BGXY
+
+-   for run36 - AH33YJBGXY
+
+``` sh
+# lang: sh
+
+for file in *.fastq.gz; do
+    mv "$file" "${file%.fastq.gz}_AH2572BGXY.fastq.gz"
+done
+
+for file in *.fastq.gz; do
+    mv "$file" "${file%.fastq.gz}_AH33YJBGXY.fastq.gz"
+done
+```
+
 ``` r
-# lang: R
+# lang: r
 
 library(tidyverse)
-
-# List the files in the directory
 files <- list.files(pattern = ".fastq.gz")
 
-# Split the filenames by underscores
-split_files <- str_split(files, "_")
+df <- tibble(filename = files)
+df$file_to_split <- df$filename
+df <- df %>% separate(file_to_split, c("sample", "SeqID", "Read", "lane", "seq.run", "Extension"), extra = "merge")
 
-# Extract sample, seq, read, and lane information from the split filenames
-info <- data.frame(
-  sample = sapply(split_files, `[`, 1),
-  seq = sapply(split_files, `[`, 2),
-  read = ifelse(grepl("R1", files), "R1", "R2"),
-  lane = sapply(split_files, `[`, 4)
-)
-
-# Create the output data frame
-output_df <- data.frame(
-  sample = info$sample,
-  fastq_1 = files,
-  fastq_2 = gsub("_R1_", "_R2_", files),
-  strandedness = "auto",
-  seq.run = "H7YRLADXX",
-  lane = paste0("L", info$lane)
-)      
-
-output_df <- output_df %>%
-  mutate(lane = str_remove(lane, "\\.fastq\\.gz$"))     
-
- # Write the output data frame to a CSV file
- write.csv(output_df, "samplesheet.csv", row.names = FALSE)     
+# Pivot the data
+df_wide <- df %>%
+  pivot_wider(names_from = Read, values_from = filename, names_prefix = "fastq_") %>%
+  rename(fastq_1 = fastq_R1, fastq_2 = fastq_R2)
+df_wide$strandedness <- rep("auto", length(df_wide$sample))
+# select names
+df_final <- df_wide %>%
+  select(c(sample, fastq_1, fastq_2, strandedness, seq.run, lane))
+  
+# Write the output data frame to a CSV file
+write.csv(df_final, "samplesheet.csv", row.names = FALSE)
 ```
 
 ``` sh
@@ -106,4 +110,3 @@ nextflow run nf-core/rnaseq \
     --fasta $PWD/ref/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz \
     --gtf $PWD/ref/Homo_sapiens.GRCh38.108.gtf.gz 
 ```
-

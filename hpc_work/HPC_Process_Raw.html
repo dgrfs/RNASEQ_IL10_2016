@@ -371,39 +371,38 @@ here:</p>
 <pre class="sh"><code># lang: sh
 
 tar -xvf 161006_Run35_fastq.tar.gz</code></pre>
-<pre class="r"><code># lang: R
+<p>add sequencing run ID to the files for run35 - AH2572BGXY for run36 -
+AH33YJBGXY</p>
+<pre class="sh"><code># lang: sh
+
+for file in *.fastq.gz; do
+    mv &quot;$file&quot; &quot;${file%.fastq.gz}_AH2572BGXY.fastq.gz&quot;
+done
+
+for file in *.fastq.gz; do
+    mv &quot;$file&quot; &quot;${file%.fastq.gz}_AH33YJBGXY.fastq.gz&quot;
+done</code></pre>
+<pre class="r"><code># lang: r
 
 library(tidyverse)
-
-# List the files in the directory
 files &lt;- list.files(pattern = &quot;.fastq.gz&quot;)
 
-# Split the filenames by underscores
-split_files &lt;- str_split(files, &quot;_&quot;)
+df &lt;- tibble(filename = files)
+df$file_to_split &lt;- df$filename
+df &lt;- df %&gt;% separate(file_to_split, c(&quot;sample&quot;, &quot;SeqID&quot;, &quot;Read&quot;, &quot;lane&quot;, &quot;seq.run&quot;, &quot;Extension&quot;), extra = &quot;merge&quot;)
 
-# Extract sample, seq, read, and lane information from the split filenames
-info &lt;- data.frame(
-  sample = sapply(split_files, `[`, 1),
-  seq = sapply(split_files, `[`, 2),
-  read = ifelse(grepl(&quot;R1&quot;, files), &quot;R1&quot;, &quot;R2&quot;),
-  lane = sapply(split_files, `[`, 4)
-)
-
-# Create the output data frame
-output_df &lt;- data.frame(
-  sample = info$sample,
-  fastq_1 = files,
-  fastq_2 = gsub(&quot;_R1_&quot;, &quot;_R2_&quot;, files),
-  strandedness = &quot;auto&quot;,
-  seq.run = &quot;H7YRLADXX&quot;,
-  lane = paste0(&quot;L&quot;, info$lane)
-)      
-
-output_df &lt;- output_df %&gt;%
-  mutate(lane = str_remove(lane, &quot;\\.fastq\\.gz$&quot;))     
-
- # Write the output data frame to a CSV file
- write.csv(output_df, &quot;samplesheet.csv&quot;, row.names = FALSE)     </code></pre>
+# Pivot the data
+df_wide &lt;- df %&gt;%
+  pivot_wider(names_from = Read, values_from = filename, names_prefix = &quot;fastq_&quot;) %&gt;%
+  rename(fastq_1 = fastq_R1, fastq_2 = fastq_R2)
+df_wide$strandedness &lt;- rep(&quot;auto&quot;, length(df_wide$sample))
+# select names
+df_final &lt;- df_wide %&gt;%
+  select(c(sample, fastq_1, fastq_2, strandedness, seq.run, lane))
+  
+# Write the output data frame to a CSV file
+write.csv(df_final, &quot;samplesheet.csv&quot;, row.names = FALSE)
+</code></pre>
 <pre class="sh"><code># lang: sh
 
 mkdir ref
