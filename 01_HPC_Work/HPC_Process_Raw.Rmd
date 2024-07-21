@@ -4,8 +4,12 @@ author: "D Griffiths"
 date: "`r Sys.Date()`"
 output: 
   html_document:
+    toc: true
+    toc_float: false
+    highlight: tango
     includes:
       in_header: header.html
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -54,7 +58,7 @@ done
 
 ```sh
 # lang: sh
-wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/create_samplesheet.R
+wget https://zenodo.org/records/12790718/files/create_samplesheet.R
 
 mamba activate renv
 # requires R environment with tidyverse_2.0.0
@@ -82,10 +86,10 @@ bash get-refs.sh
 cd ..
 
 # get config
-wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/adapted.scw.config
+wget https://zenodo.org/records/12790718/files/adapted.scw.config
 
 # get params
-wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/params.yaml
+wget https://zenodo.org/records/12790718/files/params.yaml
 
 # set up screen/tmux to run in background
 module load tmux
@@ -120,8 +124,8 @@ cd scripts
 ```
 
 ```sh
-wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/subread/slurm_subread.sh
-wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/subread/subread.R
+wget https://zenodo.org/records/12790718/files/slurm_subread.sh
+wget https://zenodo.org/records/12790718/files/subread.R
 ```
 
 Make sure to change the /path/to/workspace to the actual workspace in the slurm and R file.

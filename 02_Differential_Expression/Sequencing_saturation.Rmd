@@ -4,8 +4,12 @@ author: "Daniel D Griffiths"
 date: "`r Sys.Date()`"
 output: 
   html_document:
+    toc: true
+    toc_float: false
+    highlight: tango
     includes:
       in_header: header.html
+    code_folding: show
 ---
 
 ```{r setup, include = FALSE}

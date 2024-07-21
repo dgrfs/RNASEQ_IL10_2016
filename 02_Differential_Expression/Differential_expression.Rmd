@@ -4,13 +4,36 @@ author: "Daniel D Griffiths"
 date: "`r Sys.Date()`"
 output: 
   html_document:
+    toc: true
+    toc_float: false
+    highlight: tango
     includes:
       in_header: header.html
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Discussion of the project
+This RNASeq dataset is to complement other assays conducting in determining the role of IL-21 in stimulating gd T cells to induce anti-inflammatory IL-10.
+
+"When cultured in the presence of IL-21, Vγ9/Vδ2 T-cells acquired the ability to induce expression of the immunoregulatory cytokine IL-10 in both naïve and memory CD4+ T-cells..." (M Eberl, Unpublished)
+
+This dataset contains PBMC extractions from three healthy donors. The gd T cells have been isolated and cultured under various stimuli: Unstimulated, IL-21, IL-2, IL-15.
+
+While valuable information can be gleaned from this dataset, it is essential to acknowledge its limitations, given its small cohort size (n = 3). Preventing further, extensive analysis is the observation that one of the healthy donors (D3) diverges from the pattern observed in the other two donors. The unique gene expression pattern in D3 poses a challenge in discerning whether this deviation is attributable to technical or biological variation, given the cohort's limited size. The issues identified in D3 are detailed in the supplementary section of this markdown. Despite the absence of a clear rationale for excluding D3, it has been retained in the analysis. While it may have potentially suppressed the differential expression of certain genes, we anticipate that this will have limited effect as we focus on genes that exhibit the most differential expression between groups. Despite potential confounding from D3, we expect to identify the most differentially expressed genes. Our particular interest lies in genes related to cell-cell signaling, protein expression, and immunity; therefore, our analysis and presentation of data will emphasise this aspect of the data.
+
+Given the challenges associated with the dataset, we place limited emphasis on analyses beyond differential expression. Brief pathway analyses have been conducted and are presented in the supplementary section of this document.
+
+This dataset, along with other assays included in this project, indicates a mechanistic change in gd T cells during IL-21 stimulation but not in IL-2 and IL-15 stimulation. Therefore, the objective is to conduct a Wald test analysis of the log fold change of genes, comparing IL-21 vs IL-2 and IL-21 vs IL-15, with a specific focus on up-regulated genes in IL-21. Our focus on IL-21 up-regulated genes stems from our expectation of an active role of gd T cells in mechanistic interactions with CD4 T and CD4 T naive cells.
+
+We aim to present a table of differentially expressed genes and visualize these results through a volcano plot. In particular, we are interested in genes related to immunity and cell signaling, and these immune-related genes will be appropriately labeled. This approach facilitates a discussion of differentially expressed genes with a focus on immune-related aspects, specifically CXCL13 and TNFRS8 (CD30).
+
+The data pre-processing was conducted using NF-Core RNASeq nextflow package, and a count table produced using RSubread package. Full configuration and version information will be declared before publication.
+
+
 
 # Load libraries
 
@@ -375,7 +398,7 @@ grid.arrange(
 
 ```
 
-## Sequencing saturation
+# Sequencing saturation
 
 The following plots show the estimated sequencing saturation for the two sequencing runs conducted for this project. The code and detailed outs are found in this directory. The code is not run in this directory because the sampling is computationally taxing; so I have ran that independently of the main markdown and just showing the final plots here.
 
