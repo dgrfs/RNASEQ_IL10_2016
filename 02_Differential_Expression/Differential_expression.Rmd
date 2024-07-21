@@ -400,11 +400,12 @@ grid.arrange(
 
 # Sequencing saturation
 
-The following plots show the estimated sequencing saturation for the two sequencing runs conducted for this project. The code and detailed outs are found in this directory. The code is not run in this directory because the sampling is computationally taxing; so I have ran that independently of the main markdown and just showing the final plots here.
+The following plots show the estimated sequencing saturation for the two sequencing runs conducted for this project. The code and detailed outs are found in this directory. The code is not run in this directory because the sampling is computationally demanding; so I have ran that independently of the main markdown and just showing the final plots here.
 
-![Estimated sequencing saturation for sequencing run 35](Sequencing_saturation_outs/saturation_curve_run35.png)
+```{r, echo=FALSE,out.width="49%",out.height="20%",fig.cap="Caption: Estimated sequencing saturation plots for run35 (left) and run36 (right)",fig.show='hold',fig.align='center', eval=TRUE}
 
-![Estimated sequencing saturation for sequencing run 36](Sequencing_saturation_outs/saturation_curve_run36.png)
+knitr::include_graphics(c("Sequencing_saturation_outs/saturation_curve_run35.png","Sequencing_saturation_outs/saturation_curve_run36.png"))
+``` 
 
 # Conclusion
 
@@ -413,4 +414,3 @@ The sequencing runs are called 35 and 36 because this is the numbers given by th
 The plots for run 35 and run 36 are very similar. They both reach random sampling sequencing saturation. The technical batch effect will be greater than any extra information by combining the sequencing runs. Therefore, the final analysis will just contain sequencing run 35.
 
 The final analysis for the 2024 paper is the same as is shown in the 'run 35' chunks - with IL-7 removed as this was not necessary for the paper.
-
