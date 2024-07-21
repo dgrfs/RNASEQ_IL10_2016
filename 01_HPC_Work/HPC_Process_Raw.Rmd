@@ -1,0 +1,131 @@
+---
+title: "HPC RNA Sequencing Processing using NF-CORE RNASeq Pipeline"
+author: "D Griffiths"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    includes:
+      in_header: header.html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Process raw sequencing files
+
+## Get data
+
+Data is stored on the RDS under 'raw data'
+
+Transfer to the HPC for processing
+
+Inflate the compressed files (and can run the md5 checksum to ensure that the transfer was successful)
+
+Then move on to processing using nextflow. A tutorial can be found here:
+
+<https://github.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk>
+
+```sh
+# lang: sh
+
+tar -xvf 161006_Run35_fastq.tar.gz
+```
+
+Add sequencing run ID to the files
+
+-   for run35 - AH2572BGXY
+
+-   for run36 - AH33YJBGXY
+
+```sh
+# lang: sh
+
+for file in *.fastq.gz; do
+    mv "$file" "${file%.fastq.gz}_AH2572BGXY.fastq.gz"
+done
+
+for file in *.fastq.gz; do
+    mv "$file" "${file%.fastq.gz}_AH33YJBGXY.fastq.gz"
+done
+```
+
+## Create samplesheet
+
+```sh
+# lang: sh
+wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/create_samplesheet.R
+
+mamba activate renv
+# requires R environment with tidyverse_2.0.0
+R --vanilla < create_samplesheet.R
+mamba deactivate
+
+```
+
+```sh
+# lang: sh
+
+mkdir ref
+cd ref
+
+cat << 'EOF' > get-refs.sh
+ #!/bin/bash
+ VERSION=108
+ wget -L ftp://ftp.ensembl.org/pub/release-$VERSION/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz
+ wget -L ftp://ftp.ensembl.org/pub/release-$VERSION/gtf/homo_sapiens/Homo_sapiens.GRCh38.$VERSION.gtf.gz
+EOF
+
+bash get-refs.sh
+
+# back to working directory
+cd ..
+
+# get config
+wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/adapted.scw.config
+
+# get params
+wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/params.yaml
+
+# set up screen/tmux to run in background
+module load tmux
+tmux
+
+# load dependencies
+module load singularity-ce/3.11.4
+module load nextflow/22.10.6
+
+nextflow run nf-core/rnaseq \
+    -r 3.12.0 \
+    -params-file params.yaml \
+    -profile singularity \
+    -c adapted.scw.config \
+    --fasta $PWD/ref/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz \
+    --gtf $PWD/ref/Homo_sapiens.GRCh38.108.gtf.gz 
+  
+```
+
+## MultiQC
+
+<a href="./multiqc_report_run35.html" target="_blank"> MultiQC Report - Run 35</a> (Opens in new window)
+
+<a href="./multiqc_report_run36.html" target="_blank"> MultiQC Report - Run 36</a> (Opens in new window)
+
+
+## Get subread scripts
+
+```sh
+mkdir scripts
+cd scripts
+```
+
+```sh
+wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/subread/slurm_subread.sh
+wget https://raw.githubusercontent.com/dgrfs/NFCore_RNASeq_Cardiff_University_Hawk/main/subread/subread.R
+```
+
+Make sure to change the /path/to/workspace to the actual workspace in the slurm and R file.
+
+Run subread for a count table.
+
+There are many options here in terms of getting a count table. I am most familiar with using RSubread FeatureCounts, applying it manually to the .bam files after the pipeline is finished up to hisat2 alignment. Actually, NF-Core RNASeq runs FeatureCounts, but I just make my own with my own code that I understand and can make sure what reference genome is used. A more streamlined approach would be to use the FeatureCounts that is run by NF-Core, or to use star_salmon alignment.

@@ -1,0 +1,158 @@
+---
+title: "Sequencing Saturation"
+author: "Daniel D Griffiths"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    includes:
+      in_header: header.html
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# Summary
+
+This script was used to estimate sequencing saturation for the sequencing runs in this directory. This has been kept separate from the other analysis as this is computationally taxing, so was not run for render of the markdowns. The code here has been run to achieve the results, but the code itself was not run during the rendering of the document.
+
+# Libraries
+
+```{r}
+library(tidyverse)
+library(RNAseQC)
+library(edgeR)
+library(EnsDb.Hsapiens.v79)
+```
+
+# Preferences
+
+```{r}
+dir.create("Sequencing_saturation_outs")
+set.seed(42)
+```
+
+
+```{r}
+counts_run35 <- read_rds("counts_run35.rds")
+counts_run36 <- read_rds("counts_run36.rds")
+
+coldata <- tibble::tribble(
+  ~SeqID, ~healthy_donor, ~condition,
+  "MERNA1", "D1", "IL2",
+  "MERNA2", "D1", "IL15",
+  "MERNA3", "D1", "IL21",
+  "MERNA4", "D1", "IL7",
+  "MERNA5", "D1", "UST",
+  "MERNA6", "D2", "IL2",
+  "MERNA7", "D2", "IL15",
+  "MERNA8", "D2", "IL21",
+  "MERNA9", "D2", "IL7",
+  "MERNA10", "D2", "UST",
+  "MERNA11", "D3", "IL2",
+  "MERNA12", "D3", "IL15",
+  "MERNA13", "D3", "IL21",
+  "MERNA14", "D3", "IL7",
+  "MERNA15", "D3", "UST"
+)
+
+```
+
+# Run 35
+
+```{r}
+targets = coldata
+fc = counts_run35
+genes = rownames(counts)
+group = paste0(targets$condition)
+
+### Creating a DGEList for use with edgeR and DEseq2 ####
+y<-DGEList(fc, group=group, genes = genes)
+#y$genes$Symbol<-mapIds(org.Hs.eg.db, rownames(y),keytype = "ENTREZID", column="SYMBOL")
+
+#### DGElist filtering, voom, get lib size ####
+keep <- rowSums(cpm(y) > 3) >= 10
+table(keep)
+
+yfilt<-y[keep, , keep.lib.sizes=FALSE]
+yfilt<-calcNormFactors(yfilt)
+
+
+# Begin estimate saturation from the RNASeQC package
+ysat<-estimate_saturation(yfilt$counts, max_reads = 10000000, method="sampling", 
+                          ndepths=10,nreps=3,min_counts = 5)
+
+design<-as.data.frame(yfilt$samples)
+design$cell.type<-design$group
+design$libid<-rownames(design)
+
+
+satcurve_run35 <- 
+  plot_saturation_curve(ysat, design, design_id_col = "libid",
+                      plot_points = FALSE, color_points_by_var = 'cell.type',
+                      plot_lines = TRUE, color_lines_by_var = "cell.type",
+                      plot_terminal_points = TRUE, color_terminal_points_by_var = 'cell.type', 
+                      plot_smooths = FALSE,
+                      color_smooths_by_var = "cell.type", log_transform_depth = FALSE,
+                      log_transform_genes = FALSE, my_cols = NULL)
+
+png("Sequencing_saturation_outs/saturation_curve_run35.png")
+satcurve_run35
+dev.off()
+
+#### CHECKPOINT ####
+#### saturation estimation takes time. set up checkpoint in case it breaks and need to go back and edit
+saveRDS(ysat, 'Sequencing_saturation_outs/saturation_curve_run35.rds')
+
+```
+
+
+
+# Run 36
+
+```{r}
+targets = coldata
+fc = counts_run36
+genes = rownames(counts)
+group = paste0(targets$condition)
+
+### Creating a DGEList for use with edgeR and DEseq2 ####
+y<-DGEList(fc, group=group, genes = genes)
+# y$genes$Symbol<-mapIds(org.Hs.eg.db, rownames(y),keytype = "ENTREZID", column="SYMBOL")
+
+#### DGElist filtering, voom, get lib size ####
+keep <- rowSums(cpm(y) > 3) >= 10
+table(keep)
+
+yfilt<-y[keep, , keep.lib.sizes=FALSE]
+yfilt<-calcNormFactors(yfilt)
+
+
+# Begin estimate saturation from the RNASeQC package
+ysat<-estimate_saturation(yfilt$counts, max_reads = 10000000, method="sampling", 
+                          ndepths=10,nreps=3,min_counts = 5)
+
+design<-as.data.frame(yfilt$samples)
+design$cell.type<-design$group
+design$libid<-rownames(design)
+
+
+satcurve_run36 <- 
+  plot_saturation_curve(ysat, design, design_id_col = "libid",
+                      plot_points = FALSE, color_points_by_var = 'cell.type',
+                      plot_lines = TRUE, color_lines_by_var = "cell.type",
+                      plot_terminal_points = TRUE, color_terminal_points_by_var = 'cell.type', 
+                      plot_smooths = FALSE,
+                      color_smooths_by_var = "cell.type", log_transform_depth = FALSE,
+                      log_transform_genes = FALSE, my_cols = NULL)
+
+png("Sequencing_saturation_outs/saturation_curve_run36.png")
+satcurve_run36
+dev.off()
+
+#### CHECKPOINT ####
+#### saturation estimation takes time. set up checkpoint in case it breaks and need to go back and edit
+saveRDS(ysat, 'Sequencing_saturation_outs/saturation_curve_run36.rds')
+
+```
+
