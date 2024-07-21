@@ -414,3 +414,9 @@ The sequencing runs are called 35 and 36 because this is the numbers given by th
 The plots for run 35 and run 36 are very similar. They both reach random sampling sequencing saturation. The technical batch effect will be greater than any extra information by combining the sequencing runs. Therefore, the final analysis will just contain sequencing run 35.
 
 The final analysis for the 2024 paper is the same as is shown in the 'run 35' chunks - with IL-7 removed as this was not necessary for the paper.
+
+# Session info
+
+```{r}
+sessionInfo()
+```
